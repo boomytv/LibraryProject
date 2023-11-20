@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class BookController {
     LibraryService libraryService;
 
     @GetMapping(path = "api/library/{libId}/books", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<List<BookDTO>> getAllBooks(@PathVariable int libId) {
         List<Book> bookList = bookService.findByLibraryId(libId);
         List<BookDTO> bookDTOList = new ArrayList<>();
@@ -37,6 +39,7 @@ public class BookController {
         return new ResponseEntity<>(bookDTOList, HttpStatus.OK);
     }
     @GetMapping(path = "/api/library/{libId}/book/{bookId}")
+    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<BookDTO> getBook(@PathVariable int libId, @PathVariable int bookId) {
         Book book = bookService.findByLibraryIdAndBookId(libId, bookId);
         if (book.getTitle() == null)
@@ -47,6 +50,7 @@ public class BookController {
     }
 
     @PostMapping(path = "/api/library/{libId}/book")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     public ResponseEntity<String> addBook(@PathVariable int libId, @RequestBody BookDTO bookDTO) {
         if(!isRequestDataInvalid(bookDTO))
         {
@@ -58,11 +62,12 @@ public class BookController {
         }
         Book book = new Book(bookDTO, library);
         bookService.insertBook(book);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping(path = "/api/library/{libId}/book/delete/{bookId}")
-    public ResponseEntity<String> deleteLibrary(@PathVariable int libId, @PathVariable int bookId) {
+    @DeleteMapping(path = "/api/library/{libId}/book/{bookId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    public ResponseEntity<String> deleteBook(@PathVariable int libId, @PathVariable int bookId) {
         Book book = bookService.findByLibraryIdAndBookId(libId, bookId);
         if (book.getTitle() == null)
         {
@@ -72,8 +77,9 @@ public class BookController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(path = "/api/library/{libId}/book/update/{bookId}")
-    public ResponseEntity<String> updateLibrary(@PathVariable int libId, @PathVariable int bookId, @RequestBody BookDTO bookDTO)
+    @PutMapping(path = "/api/library/{libId}/book/{bookId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
+    public ResponseEntity<String> updateBook(@PathVariable int libId, @PathVariable int bookId, @RequestBody BookDTO bookDTO)
     {
         if (!isRequestDataInvalid(bookDTO))
         {

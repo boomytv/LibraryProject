@@ -25,17 +25,20 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
+    @Column
+    private String creatorId;
 
     public Reservation() {
 
     }
 
-    public Reservation(ReservationDTO reservationDTO, Book bookNew)
+    public Reservation(ReservationDTO reservationDTO, Book bookNew, String userid)
     {
         id = getId();
         reservetimestart = reservationDTO.getReservetimestart();
         reservetimeend = reservationDTO.getReservetimeend();
         person = reservationDTO.getPerson();
         book = bookNew;
+        creatorId = userid;
     }
 }

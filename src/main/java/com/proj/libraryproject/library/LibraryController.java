@@ -2,11 +2,13 @@ package com.proj.libraryproject.library;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.proj.libraryproject.utils.UserService;
 import com.proj.libraryproject.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +27,8 @@ public class LibraryController {
     @Autowired
     ObjectMapper objectMapper;
 
-    @GetMapping(path = "api/library/get-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "api/libraries", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<List<Library>> getAllLibraries() {
         List<Library> libraries = libraryService.selectAllLibraries();
         if (libraries.isEmpty()) {
@@ -34,6 +37,7 @@ public class LibraryController {
         return new ResponseEntity<>(libraries, HttpStatus.OK);
     }
     @GetMapping(path = "api/library/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<Library> getLibrary(@PathVariable int id) {
         Library library = libraryService.selectLibrary(id);
         if(library == null)
@@ -42,7 +46,8 @@ public class LibraryController {
         }
         return new ResponseEntity<>(library, HttpStatus.OK);
     }
-    @PostMapping(path = "api/library/add", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "api/library", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> addLibrary(@RequestBody String libraryString) throws IOException {
         LibraryDTO libraryToAdd = objectMapper.readValue(libraryString, LibraryDTO.class);
         if(!isRequestDataInvalid(libraryToAdd))
@@ -57,9 +62,10 @@ public class LibraryController {
         }
         Library library = Utils.convertToLibrary(libraryToAdd);
         libraryService.insertLibrary(library);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    @DeleteMapping (path = "api/library/delete/{id}")
+    @DeleteMapping (path = "api/library/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteLibrary(@PathVariable("id") int id) {
         Library library = libraryService.selectLibrary(id);
         if (library == null)
@@ -73,7 +79,8 @@ public class LibraryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There are linked objects with Foreign Key to this class");
         }
     }
-    @PutMapping (path = "api/library/update/{id}")
+    @PutMapping (path = "api/library/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateLibrary(@PathVariable("id") int id, @RequestBody LibraryDTO libraryDTO) {
         if(!isRequestDataInvalid(libraryDTO))
         {
