@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @Controller
 public class LibraryController {
 
@@ -28,7 +29,6 @@ public class LibraryController {
     ObjectMapper objectMapper;
 
     @GetMapping(path = "api/libraries", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<List<Library>> getAllLibraries() {
         List<Library> libraries = libraryService.selectAllLibraries();
         if (libraries.isEmpty()) {
@@ -37,7 +37,6 @@ public class LibraryController {
         return new ResponseEntity<>(libraries, HttpStatus.OK);
     }
     @GetMapping(path = "api/library/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<Library> getLibrary(@PathVariable int id) {
         Library library = libraryService.selectLibrary(id);
         if(library == null)
@@ -47,7 +46,6 @@ public class LibraryController {
         return new ResponseEntity<>(library, HttpStatus.OK);
     }
     @PostMapping(path = "api/library", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> addLibrary(@RequestBody String libraryString) throws IOException {
         LibraryDTO libraryToAdd = objectMapper.readValue(libraryString, LibraryDTO.class);
         if(!isRequestDataInvalid(libraryToAdd))
@@ -65,7 +63,6 @@ public class LibraryController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     @DeleteMapping (path = "api/library/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteLibrary(@PathVariable("id") int id) {
         Library library = libraryService.selectLibrary(id);
         if (library == null)
@@ -80,7 +77,6 @@ public class LibraryController {
         }
     }
     @PutMapping (path = "api/library/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> updateLibrary(@PathVariable("id") int id, @RequestBody LibraryDTO libraryDTO) {
         if(!isRequestDataInvalid(libraryDTO))
         {

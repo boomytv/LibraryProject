@@ -28,6 +28,11 @@ public class ReservationService {
         }
         return reservationList;
     }
+    public List<Reservation> getAllReservations() {
+        List<Reservation> reservationList = new ArrayList<Reservation>();
+        reservationList.addAll(repository.findAll());
+        return reservationList;
+    }
 
     public Reservation findByLibraryIdAndBookIdAndReservationId(int libraryId, int bookId, int resId) {
         Reservation reservation = new Reservation();

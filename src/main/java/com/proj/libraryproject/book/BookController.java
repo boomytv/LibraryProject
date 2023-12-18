@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@CrossOrigin(origins = "*")
 @Controller
 public class BookController {
 
@@ -25,13 +26,9 @@ public class BookController {
     LibraryService libraryService;
 
     @GetMapping(path = "api/library/{libId}/books", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<List<BookDTO>> getAllBooks(@PathVariable int libId) {
         List<Book> bookList = bookService.findByLibraryId(libId);
         List<BookDTO> bookDTOList = new ArrayList<>();
-        if (bookList.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         for(Book book : bookList)
         {
             bookDTOList.add(new BookDTO(book));
@@ -39,7 +36,6 @@ public class BookController {
         return new ResponseEntity<>(bookDTOList, HttpStatus.OK);
     }
     @GetMapping(path = "/api/library/{libId}/book/{bookId}")
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<BookDTO> getBook(@PathVariable int libId, @PathVariable int bookId) {
         Book book = bookService.findByLibraryIdAndBookId(libId, bookId);
         if (book.getTitle() == null)
@@ -50,7 +46,6 @@ public class BookController {
     }
 
     @PostMapping(path = "/api/library/{libId}/book")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     public ResponseEntity<String> addBook(@PathVariable int libId, @RequestBody BookDTO bookDTO) {
         if(!isRequestDataInvalid(bookDTO))
         {
@@ -66,7 +61,6 @@ public class BookController {
     }
 
     @DeleteMapping(path = "/api/library/{libId}/book/{bookId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     public ResponseEntity<String> deleteBook(@PathVariable int libId, @PathVariable int bookId) {
         Book book = bookService.findByLibraryIdAndBookId(libId, bookId);
         if (book.getTitle() == null)
@@ -78,7 +72,6 @@ public class BookController {
     }
 
     @PutMapping(path = "/api/library/{libId}/book/{bookId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('WORKER')")
     public ResponseEntity<String> updateBook(@PathVariable int libId, @PathVariable int bookId, @RequestBody BookDTO bookDTO)
     {
         if (!isRequestDataInvalid(bookDTO))

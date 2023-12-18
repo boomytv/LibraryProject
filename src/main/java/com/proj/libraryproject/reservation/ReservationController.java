@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@CrossOrigin(origins = "*")
 @Controller
 public class ReservationController {
 
@@ -43,21 +44,11 @@ public class ReservationController {
     private JwtUtils jwtUtils;
 
     @GetMapping(path = "api/library/{libId}/book/{bookId}/reservations", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
-    public ResponseEntity<List<ReservationDTO>> getAllReservations(@PathVariable int libId, @PathVariable int bookId) {
+    public ResponseEntity<List<Reservation>> getAllReservations(@PathVariable int libId, @PathVariable int bookId) {
         List<Reservation> reservationList = reservationService.findByLibraryIdAndBookId(libId, bookId);
-        List<ReservationDTO> reservationDTOList = new ArrayList<>();
-        if (reservationList.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        for(Reservation reservation : reservationList)
-        {
-            reservationDTOList.add(new ReservationDTO(reservation));
-        }
-        return new ResponseEntity<>(reservationDTOList, HttpStatus.OK);
+        return new ResponseEntity<>(reservationList, HttpStatus.OK);
     }
     @GetMapping(path = "/api/library/{libId}/book/{bookId}/reservation/{resId}")
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<ReservationDTO> getReservation(@PathVariable int libId, @PathVariable int bookId, @PathVariable int resId) {
         Reservation reservation = reservationService.findByLibraryIdAndBookIdAndReservationId(libId, bookId, resId);
         if (reservation.getPerson() == null)
@@ -68,7 +59,6 @@ public class ReservationController {
     }
 
     @PostMapping(path = "/api/library/{libId}/book/{bookId}/reservation")
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<String> addReservation(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int libId, @PathVariable int bookId, @RequestBody ReservationDTO reservationDTO) {
         if(!isRequestDataInvalid(reservationDTO))
         {
@@ -99,7 +89,6 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
     @DeleteMapping(path = "/api/library/{libId}/book/{bookId}/reservation/{resId}")
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<String> deleteReservation(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int libId, @PathVariable int bookId, @PathVariable int resId) {
         Reservation reservation = reservationService.findByLibraryIdAndBookIdAndReservationId(libId, bookId, resId);
         if (reservation.getPerson() == null)
@@ -125,7 +114,6 @@ public class ReservationController {
         return new ResponseEntity<>("Access denied", HttpStatus.UNAUTHORIZED);
     }
     @PutMapping(path = "/api/library/{libId}/book/{bookId}/reservation/{resId}")
-    @PreAuthorize("hasRole('CLIENT') or hasRole('WORKER') or hasRole('ADMIN')")
     public ResponseEntity<String> updateReservation(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int libId, @PathVariable int bookId, @PathVariable int resId, @RequestBody ReservationDTO reservationDTO) {
         if(!isRequestDataInvalid(reservationDTO))
         {

@@ -91,7 +91,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth ->
 						auth.requestMatchers(mvc.pattern("/api/auth/**")).permitAll()
-								.requestMatchers(mvc.pattern("/api/test/**")).permitAll()
+								.requestMatchers(mvc.pattern("api/**")).permitAll()
 								.anyRequest().authenticated()
 				);
 
